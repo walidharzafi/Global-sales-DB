@@ -1,0 +1,317 @@
+use globaldb
+-----------------------------------
+> var collectionList = ["allsales", "categories", "customers", "employees", "employeeterritories", "orderdetails", "orders", "regions", "products", "shippers", "suppliers", "territories"];
+> collectionList.forEach(function(collectionName) {db.createCollection(collectionName)})
+-------------------------------------
+mongoimport --type csv -d testerr -c testtest --headerline --drop All-sales.csv
+mongoimport --type csv -d globaldb -c categories --headerline --drop categories.csv
+mongoimport --type csv -d globaldb -c customers --headerline --drop customers.csv
+mongoimport --type csv -d globaldb -c employees --headerline --drop employees.csv
+mongoimport --type csv -d globaldb -c employee-territories --headerline --drop employee-territories.csv
+mongoimport --type csv -d globaldb -c order-details --headerline --drop order-details.csv
+mongoimport --type csv -d globaldb -c orders --headerline --drop orders.csv
+mongoimport --type csv -d globaldb -c regions --headerline --drop regions.csv
+mongoimport --type csv -d globaldb -c products --headerline --drop products.csv
+mongoimport --type csv -d globaldb -c shippers --headerline --drop shippers.csv
+mongoimport --type csv -d globaldb -c suppliers --headerline --drop suppliers.csv
+mongoimport --type csv -d globaldb -c territories --headerline --drop territories.csv
+---------------------------------------
+
+db.getName()
+db.getCollectionNames(), db.getCollection('sales', 'categories').validate()
+db.allsales.validate()
+
+---------------------------------------
+$jsonSchema: {
+    bsonType: 'object',
+    required: [
+      'OrderID',
+      'CustomerID',
+      'EmployeeID',
+      'OrderDate',
+      'RequiredDate',
+      'ShippedDate',
+      'ShipCountry',
+      'ShipName',
+      'ShipCity',
+      'ShipRegion',
+      'ShipAddress'
+    ],
+    properties: {
+      OrderID: {
+        bsonType: 'int'
+      },
+      CustomerID: {
+        bsonType: 'int'
+      },
+      EmployeeID: {
+        bsonType: 'double'
+      },
+      Freight: {
+        bsonType: 'double'
+      },
+      OrderDate: {
+        bsonType: 'int'
+      },
+      ShipName: {
+        bsonType: 'string'
+      },
+      ShipAddress: {
+        bsonType: 'string'
+      },
+      ShipCity: {
+        bsonType: 'string'
+      },
+      ShipRegion: {
+        bsonType: 'string'
+      },
+      ShipPostalCode: {
+        bsonType: 'int'
+      },
+      ShipCountry: {
+        bsonType: 'string'
+      },
+      ShipVia: {
+        bsonType: 'int'
+      }
+    }
+  }
+
+
+
+db.createCollection("sales", {
+   validator: {
+{
+  $jsonSchema: {
+    bsonType: "object",
+    required: [
+      'OrderID',
+      'CustomerID',
+      'EmployeeID',
+      'OrderDate',
+      'RequiredDate',
+      'ShippedDate',
+      'ShipCountry',
+      'ShipName',
+      'ShipCity',
+      'ShipRegion',
+      'ShipAddress'
+    ],
+    properties: {
+      OrderID: {
+               bsonType: "int",
+            },
+      CustomerID: {
+               bsonType: "int",
+            },
+      EmployeeID: {
+               bsonType: "double",
+            },
+      Freight: {
+               bsonType: "double",
+            },
+      OrderDate: {
+               bsonType: "int",
+            },
+      ShipName: {
+               bsonType: "string",
+            },
+      ShipAddress: {
+               bsonType: "string",
+            },
+      ShipCity: {
+               bsonType: "string",
+            },
+      ShipRegion: {
+               bsonType: "string",
+            },
+      ShipPostalCode: {
+               bsonType: "int",
+            },
+      ShipCountry: {
+               bsonType: "string",
+            },
+      ShipVia: {
+               bsonType: "int",
+            },
+      
+    }
+   
+  }
+}
+   }
+})
+
+-------------------------------------------------------
+
+use admin
+db.createUser(
+  {
+    user: "Admin",
+    pwd: "Admin",
+    roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
+  }
+)
+
+security:
+    authorization: enabled
+
+src : https://docs.mongodb.com/manual/tutorial/enable-authentication/
+
+---------------------------------------------------------
+db.createRole(
+ {
+  role: "dataadmin",
+  privileges: [
+   {resource: {db: "globaldb", collection:""}, actions: [ "find", "update", "insert", "remove" ] }
+  ],
+  roles: [{ role: "readWrite", db: "globaldb"}]
+ }
+);
+
+db.createUser(
+  {
+    user: "myTester",
+    pwd:  passwordPrompt(),   // or cleartext password
+    roles: [ { role: "readWrite", db: "test" },
+             { role: "read", db: "reporting" } ]
+  }
+)
+--------------------------------------------------------
+
+mongodump --db=globalDb --out=C:\data\backup\dump --authenticationDatabase "admin" -u "Admin" -p "Admin"
+mongorestore  dump/ --authenticationDatabase "admin" -u "Admin" -p "Admin"
+
+mongorestore dump\
+
+mongodump -db=globalDb --authenticationDatabase "admin" -u "Admin" -p "Admin"
+
+mongorestore --nsInclude globalDb --verbose \dump\ --authenticationDatabase "admin" -u "Admin" -p "Admin"
+
+
+mongorestore --noIndexRestore -d globalDb  dump\ --authenticationDatabase "admin" -u "Admin" -p "Admin"
+
+mongorestore --verbose dump\globalDb --authenticationDatabase "admin" -u "Admin" -p "Admin"
+
+mongorestore --verbose dump
+
+mongorestore -d testerr dump
+
+mongorestore -db=globalDb dump\globalDb --authenticationDatabase "admin" -u "Admin" -p "Admin"
+-----------------------------------------------------------
+
+db.createRole(
+ {
+  role: "dataadmin",
+  privileges: [
+   {resource: {db: "globaldb", collection:""}, actions: [ "find", "update", "insert", "remove" ] }
+  ],
+  roles: [{ role: "readWrite", db: "globaldb"}]
+ }
+);
+
+db.createUser(
+ {
+  user: "Achraf",
+  pwd: "dataadmin",
+  roles: [ { role: "dataadmin", db: "globaldb" } ]
+ }
+)
+
+db.createUser(
+ {
+  user: "Mouhamed",
+  pwd: "dataadmin",
+  roles: [ { role: "dataadmin", db: "globaldb" } ]
+ }
+)
+
+db.createUser(
+ {
+  user: "Walid",
+  pwd: "dataadmin",
+  roles: [ { role: "dataadmin", db: "globaldb" } ]
+ }
+)
+
+
+db.createUser(
+ {
+  user: "Abderahim",
+  pwd: "dataadmin",
+  roles: [ { role: "dataadmin", db: "globaldb" } ]
+ }
+)
+
+----------------------------------------------------------
+veille TEC : 
+----------------------------------------------------------
+
+
+database performance tuning : Set of activities and procedures that reduce response time of database system
+
+Hardware : cpu, ram, hard disk, network
+Software : OS'64bit), net, application
+
+
+Analyze locking performance : 
+db.serverStatus().globalLock
+db.serverStatus().locks
+
+Storage engines and locking : 
+Is the database frequently locking from queries? This might indicate issues with the schema design, query structure, or system architecture.
+Note the differences in how these storage engines handle locking. MMAPv1 locks whole collections, not individual documents. WiredTiger performs locking at the document level. This reduces locks. And, it lets us read or update multiple documents in a collection concurrently.
+
+Examine memory use :
+When the MMAPv1 storage engine is in use, MongoDB will use memory-mapped files to store data. All available memory will be allocated for this usage if the data set is large enough.
+
+db.serverStatus().mem
+
+Tune the WiredTiger cache :
+A good rule of thumb is that the size of the cache should be big enough to hold the entire application working set
+
+db.serverStatus().wiredTiger.cache
+
+Monitor the number of current connections
+MongoDB has no limits on incoming connections. But there’s a catch
+
+db.serverStatus().connections
+
+source : https://stackify.com/mongodb-performance-tuning/
+
+
+-----------------------------------------------------
+
+Sharding : is the process of storing data records across multiple machines and it is MongoDB's approach to meeting the demands of data growth. As the size of the data increases, a single machine may not be sufficient to store the data nor provide an acceptable read and write throughput. Sharding solves the problem with horizontal scaling. With sharding, you add more machines to support data growth and the demands of read and write operations.
+
+src : https://docs.mongodb.com/manual/sharding/
+------------------------------------------------------
+
+Replication is the process of synchronizing data across multiple servers. Replication provides redundancy and increases data availability with multiple copies of data on different database servers. Replication protects a database from the loss of a single server. Replication also allows you to recover from hardware failure and service interruptions. With additional copies of the data, you can dedicate one to disaster recovery, reporting, or backup.
+
+src : https://www.tutorialspoint.com/mongodb/mongodb_replication.htm
+
+--------------------------------------------------------
+
+Capped collections : Capped collections are fixed-size circular collections that follow the insertion order to support high performance for create, read, and delete operations. By circular, it means that when the fixed size allocated to the collection is exhausted, it will start deleting the oldest document in the collection without providing any explicit commands.
+
+Capped collections restrict updates to the documents if the update results in increased document size. Since capped collections store documents in the order of the disk storage, it ensures that the document size does not increase the size allocated on the disk. Capped collections are best for storing log information, cache data, or any other high volume data.
+
+Creating Capped Collection
+To create a capped collection, we use the normal createCollection command but with capped option as true and specifying the maximum size of collection in bytes.
+
+To create a capped collection, we use the normal createCollection command but with capped option as true and specifying the maximum size of collection in bytes.
+
+>db.createCollection("cappedLogCollection",{capped:true,size:10000})
+In addition to collection size, we can also limit the number of documents in the collection using the max parameter −
+
+>db.createCollection("cappedLogCollection",{capped:true,size:10000,max:1000})
+If you want to check whether a collection is capped or not, use the following isCapped command −
+
+>db.cappedLogCollection.isCapped()
+If there is an existing collection which you are planning to convert to capped, you can do it with the following code −
+
+>db.runCommand({"convertToCapped":"posts",size:10000})
+
+
+src : https://www.tutorialspoint.com/mongodb/mongodb_capped_collections.htm
